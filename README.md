@@ -1,6 +1,8 @@
-# Weather Extension V2
+# Weather Extension
 
 ![Screenshot](https://f.cloud.github.com/assets/1255506/833069/0f754966-f28b-11e2-9fb3-3ea413919c69.png)
+
+[![Gitter chat](https://badges.gitter.im/Neroth/gnome-shell-extension-weather.png)](https://gitter.im/Neroth/gnome-shell-extension-weather)
 
 *gnome-shell-extension-weather* is a simple extension for displaying weather conditions and forecasts in GNOME Shell, featuring support for multiple locations, no need for WOEID, a symmetrical layout and a settings panel through *gnome-shell-extension-prefs*.
 
@@ -18,8 +20,6 @@ We need translator ! [Translate the extension](https://github.com/Neroth/gnome-s
 
 ## Through extensions.gnome.org (Local installation)
 
-**Waiting for review / Version 9 : V1 (<= GNOME Shell 3.8) / Version 10 : V2 (>= GNOME Shell 3.8)**
-
 Go on the [Weather extension page](https://extensions.gnome.org/extension/613/weather/) on extensions.gnome.org, click on the switch ("OFF" => "ON"), click on the install button.
 That's it !
 
@@ -35,22 +35,14 @@ Add the PPA *ppa:gnome-shell-extensions* to your source list, update the package
 	sudo apt-get update
 	sudo apt-get install gnome-shell-extension-weather
 
-### [Debian](http://packages.debian.org/source/unstable/gnome-shell-extension-weather)
-
-For Debian "Wheezy" 7, add the (official backports archive)[http://backports.debian.org/Instructions/] to your sources list. This step is not needed for Debian "Jessie" or "Sid".
-
-Then install the package through APT:
-
-	sudo apt-get install gnome-shell-extension-weather
-
 ### [Fedora](http://rpmfusion.org/)
 
-Packages for Fedora are available in the [RPM Fusion](http://rpmfusion.org/) repositories. If these are not enabled on your system, please install them through the following command (root password required):
+Packages for Fedora are available in the [RPM Fusion](http://rpmfusion.org/) repositories. If these are not enabled on your system, please install them through the following command:
 
-	su -c 'yum localinstall --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-stable.noarch.rpm'
-Then, install *gnome-shell-extension-weather* (root password required):
+	sudo dnf install http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+Then, install *gnome-shell-extension-weather*:
 
-	su -c 'yum install gnome-shell-extension-weather'
+	sudo dnf install gnome-shell-extension-weather
 
 ### [Arch Linux](https://aur.archlinux.org/packages/gnome-shell-extension-weather-git/)
 
@@ -72,7 +64,8 @@ Make sure you have the following dependencies installed:
 * *gnome-common*,
 * *autoconf*,
 * *automake*,
-* *intltool*.
+* *intltool*,
+* *gir1.2-gweather-3.0*.
 
 Run the following commands:
 
@@ -98,13 +91,13 @@ You can also use *dconf-editor* or *gsettings* to configure the extension throug
 
 To debug the extension, active the switch `Debug extension` in the settings:
 
-You have now two new file ("weather.log" and "weather-prefs.log") in the extension dir (`~/.local/share/gnome-shell/extensions/weather-extension@xeked.com/`).
+You have now two new file ("weather-extension.log" and "weather-extension-prefs.log") in your user cache dir (~/.cache/).
 
 ----
 
 # Licence
 
-Copyright (C) 2011 - 2013
+Copyright (C) 2011 - 2014
 
 * Christian Metzler <neroth@xeked.com>,
 * Elad Alfassa <elad@fedoraproject.org>,

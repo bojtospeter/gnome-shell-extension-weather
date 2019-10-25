@@ -40,6 +40,7 @@ const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const Mainloop = imports.mainloop;
 const St = imports.gi.St;
 const Clutter = imports.gi.Clutter;
 const PopupMenu = imports.ui.popupMenu;
@@ -50,7 +51,6 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
 const Pango = imports.gi.Pango;
-const EXTENSIONDIR = Me.dir.get_path();
 
 // Settings
 const WEATHER_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.weather';
@@ -128,7 +128,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		{
 			if(typeof this.logfile == "undefined")
 			{
-			this.logfile = Gio.file_new_for_path(EXTENSIONDIR+"/weather.log");
+			this.logfile = Gio.file_new_for_path(GLib.get_user_cache_dir()+"/weather-extension.log");
 				if(this.logfile.query_exists(null))
 				this.logfile.delete(null);
 			}
@@ -145,7 +145,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		return 0;
 		},
 
-		world : GWeather.Location.new_world(false),
+		world : GWeather.Location.get_world(),
 
 		start : function()
 		{												this.status("Starting Weather");
@@ -159,13 +159,12 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		this.location = this.city;
 			if(this.city_name)
 			{											this.status("Location ("+this.city_name+") loaded");
-			this.info = new GWeather.Info({ world: this.world,
-                                       location: this.location,
-                                       forecast_type: GWeather.ForecastType.LIST,
-                                       enabled_providers: (GWeather.Provider.METAR |
-                                                           GWeather.Provider.YR_NO |
-							   GWeather.Provider.YAHOO |
-							   GWeather.Provider.IWIN) });				this.status("Information loaded");
+			this.info = new GWeather.Info({location: this.location});				this.status("Information loaded");
+
+			this.info.set_enabled_providers(GWeather.Provider.METAR |
+					                GWeather.Provider.OWM |
+							GWeather.Provider.YR_NO);
+
 			this.infoC = this.info.connect("updated",function(){that.refresh();that.status(0);});	this.status("Information connection started");
 			}
 			else
@@ -177,6 +176,10 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 
 			if(this.city_name)
 			{
+				this.timer = Mainloop.timeout_add_seconds(30, Lang.bind(this, function() {
+				this.info.update();
+				return true;
+				}));										this.status("Timer started");
 			this.info.update();
 			}											this.status("Weather started"); this.status(0);
 		return 0;
@@ -184,6 +187,11 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 
 		stop : function()
 		{												this.status("Stopping Weather");
+			if(this.timer)
+			{
+			Mainloop.source_remove(this.timer);							this.status("Timer stopped");
+			}
+
 			if(this.infoC)
 			{
 			this.info.disconnect(this.infoC);
@@ -263,6 +271,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 			if(!this.info.is_valid())
 			{
 			this.weatherStatus("error");								this.status("Informations is invalid");
+			this.build = 0;
 			return 0;
 			}
 
@@ -281,7 +290,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 				conditions += getConditions(info);
 
 				if(that.comment_in_panel && that.text_in_panel)
-				conditions += ", ";
+				conditions += _(", ");
 
 				if(that.text_in_panel)
 				conditions += that.temperature_string();
@@ -289,9 +298,13 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 			return conditions;
 			};
 
-			let getLocaleTime = function(date)
+			let getLocaleTime = function(date, localTimezone)
 			{
-			date = GLib.DateTime.new_from_unix_local(date);
+				if(!localTimezone)
+				date = GLib.DateTime.new_from_unix_local(date).to_timezone(that.get_timezone());
+				else
+				date = GLib.DateTime.new_from_unix_local(date).to_timezone(GLib.TimeZone.new_local());
+
 			let localeTime = "-";
 				if(that.clock_format == "12h")
 				{
@@ -318,8 +331,12 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 			if(!this.build)
 			{
 			first = true;										this.status("First build");
-			this.build = that.info.get_update();
+			this.build = this.info.get_update();
 			this.variation("build");
+			}
+			else
+			{
+			this.build = this.info.get_update();
 			}
 
 		let update = false;
@@ -331,9 +348,13 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		let fuc = (first || update || cityVar);
 		let di_up = (first)?"displayed":"updated";
 
+			if(fuc || tempUnitVar)
+			{			
+			this.forecast = this.loadForecast();							this.status(this.forecast.length+" forecast");
+			}
+
 			if(fuc)
 			{
-			this.forecast = this.loadForecast();							this.status(this.forecast.length+" forecast");
 			this.rebuildCurrentItem(1);
 			this.rebuildForecastItem(this.forecast.length);
 			this.rebuildAttributionItem(this.info.get_attribution());
@@ -341,15 +362,15 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 			this.UI.menuIcon.icon_name = this.UI.currentIcon.icon_name = this.icon_type(this.info.get_icon_name());
 			this.UI.currentSunrise.text = getLocaleTime(this.info.get_value_sunrise()[1]);
 			this.UI.currentSunset.text = getLocaleTime(this.info.get_value_sunset()[1]);
-			this.UI.currentBuild.text = getLocaleTime(this.info.get_value_update()[1]);
-			this.UI.currentLocation.text = this.location.get_city_name()+", "+getConditions(this.info);
+			this.UI.currentBuild.text = getLocaleTime(this.info.get_value_update()[1], 1);
+			this.UI.currentLocation.text = this.location.get_city_name()+_(", ")+getConditions(this.info);
 			this.UI.currentHumidity.text = this.info.get_humidity();				this.status("Basics informations "+di_up);
 			}
 
 			if(fuc || tempUnitVar)
 			{
 			this.UI.currentSummary.text = this.temperature_string();
-			this.UI.currentLocation.text = this.location.get_city_name()+", "+getConditions(this.info);
+			this.UI.currentLocation.text = this.location.get_city_name()+_(", ")+getConditions(this.info);
 			this.UI.menuConditions.text = getMenuConditions(this.info);
 			this.UI.currentTemperature.text = this.temperature_string(this.info.get_value_apparent(this.temperature_units)[1]);
 														this.status("Temperatures informations "+di_up);
@@ -379,7 +400,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 			{
 			this.UI.currentSunrise.text = getLocaleTime(this.info.get_value_sunrise()[1]);
 			this.UI.currentSunset.text = getLocaleTime(this.info.get_value_sunset()[1]);
-			this.UI.currentBuild.text = getLocaleTime(this.info.get_value_update()[1])
+			this.UI.currentBuild.text = getLocaleTime(this.info.get_value_update()[1], 1)
 			}
 
 			for(let i in this.forecast)
@@ -409,20 +430,49 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		let initialTemp = 0;
 		let actualDate = GLib.DateTime.new_now_local();
 
+			let dayName = function(aD, nD)
+			{
+			let oneDay = 86400;
+			let today = GLib.DateTime.new_local(aD.get_year(), aD.get_month(), aD.get_day_of_month(), 0, 0, 0);
+			today = (today.to_unix()+(aD.get_utc_offset()/1000000));
+			let nDTS = (nD.to_unix()+(nD.get_utc_offset()/1000000));
+			let cur = (nDTS-today);
+
+			let dN = nD.format("%a, %x");
+			dN = dN.charAt(0).toUpperCase() + dN.slice(1);
+
+				if(cur >= oneDay && cur < oneDay*7)
+				{
+				dN = nD.format("%A");
+				dN = dN.charAt(0).toUpperCase() + dN.slice(1);
+				}
+
+				if(cur < oneDay && cur >= 0)
+				dN = _("Today");
+
+				if(cur >= oneDay && cur < oneDay*2)
+				dN = _("Tomorrow");
+
+				if(cur < 0 && cur > oneDay*-1)
+				dN = _("Yesterday");
+
+			return dN;
+			};
+
 		let oldDate = {};
 		let nowDate = {};
 
 		let forecastList = this.info.get_forecast_list();						this.status("Forecast list loaded ("+forecastList.length+")");
 
-		oldDate = GLib.DateTime.new_from_unix_local(forecastList[0].get_value_update()[1]);
+		oldDate = GLib.DateTime.new_from_unix_local(forecastList[0].get_value_update()[1]).to_timezone(this.get_timezone());
 
 			for(let i in forecastList)
 			{
-			nowDate = GLib.DateTime.new_from_unix_local(forecastList[i].get_value_update()[1]);
+			if (forecastList[i] == null) continue;
 
-				if(forecastList[i-1] != "undefined" && (oldDate.get_day_of_month() < nowDate.get_day_of_month() ||
-									oldDate.get_month() < nowDate.get_month() ||
-									oldDate.get_year() < nowDate.get_year()))
+			nowDate = GLib.DateTime.new_from_unix_local(forecastList[i].get_value_update()[1]).to_timezone(this.get_timezone());
+
+				if(forecastList[i-1] != "undefined" && (oldDate.get_day_of_month() != nowDate.get_day_of_month()))
 				{										this.status("+1 day");
 				day++;
 				}
@@ -432,43 +482,14 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 				initialTemp = forecastList[i].get_value_temp(unit)[1];				this.status("Initial temperature : "+initialTemp);
 				forecast[day] = {hour : []};
 				forecast[day].minTemp = initialTemp;
+					if(forecastList[i].get_value_temp_min(unit)[0])
+					forecast[day].minTemp = forecastList[i].get_value_temp_min(unit)[1];
 				forecast[day].maxTemp = initialTemp;
+					if(forecastList[i].get_value_temp_max(unit)[0])
+					forecast[day].maxTemp = forecastList[i].get_value_temp_max(unit)[1];
 				forecast[day].icon = "";
-				forecast[day].dayText = "";
-														this.status("Searching day name :");
-					if(actualDate.get_day_of_month() == nowDate.get_day_of_month() &&
-					   actualDate.get_month() == nowDate.get_month() &&
-					   actualDate.get_year() == nowDate.get_year())
-					{
-					forecast[day].dayText = _("Today");					this.status("This day is today");
-					}
-					else if(actualDate.add_days(1).get_day_of_month() == nowDate.get_day_of_month() &&
-						actualDate.get_month() == nowDate.get_month() &&
-						actualDate.get_year() == nowDate.get_year())
-					{
-					forecast[day].dayText = _("Tomorrow");					this.status("This day is tomorrow");
-					}
-					else if(actualDate.add_days(-1).get_day_of_month() == nowDate.get_day_of_month() &&
-						actualDate.get_month() == nowDate.get_month() &&
-						actualDate.get_year() == nowDate.get_year())
-					{
-					forecast[day].dayText = _("Yesterday");					this.status("This day is yesterday");
-					}
-					else if(actualDate.add_days(6).get_day_of_month() >= nowDate.get_day_of_month() &&
-						actualDate.get_day_of_month() <= nowDate.get_day_of_month() &&
-						actualDate.get_month() == nowDate.get_month() &&
-						actualDate.get_year() == nowDate.get_year())
-					{
-					let dow = nowDate.format("%A");
-					dow = dow.charAt(0).toUpperCase() + dow.slice(1);
-					forecast[day].dayText = dow;						this.status("This day is "+dow);
-					}
-					else
-					{
-					let dow = nowDate.format("%a, %x");
-					dow = dow.charAt(0).toUpperCase() + dow.slice(1);
-					forecast[day].dayText = dow;						this.status("This day is "+dow);
-					}									this.status("Forecast "+i+" inited");
+				forecast[day].dayText = dayName(actualDate, nowDate);				this.status("Day name : "+forecast[day].dayText);
+				this.status("Forecast "+i+" inited");
 				}
 
 			hour = nowDate.get_hour();
@@ -551,7 +572,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		{
 		this.UI = {};
 
-		this.UI.menuConditions = new St.Label({ text: _('Weather') });					this.status("UI.menuCoditions created");
+		this.UI.menuConditions = new St.Label({ y_align: Clutter.ActorAlign.CENTER, text: _('Weather') });	this.status("UI.menuCoditions created");
 
 		// Panel icon
 		this.UI.menuIcon = new St.Icon(
@@ -593,22 +614,23 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 
 		Main.panel.menuManager.addMenu(this.menu);							this.status("menu added to menu manager (panel)");
 
-		this.UI.current = new St.Bin({ style_class: 'current' });					this.status("UI.current created");
-		this.UI.forecast = new St.Bin({ style_class: 'forecast' });					this.status("UI.forecast created");
-		this.UI.attribution = new St.Bin({ style_class: 'attribution' });				this.status("UI.attribution created");
-		this.menu.addActor(this.UI.current);								this.status("UI.current added to menu");
-
 		let item;
 
+		this.UI.current = new St.Bin({style_class: 'current'});						this.status("UI.current created");
+		this.UI.forecast = new St.Bin({style_class: 'forecast'});					this.status("UI.forecast created");
+		this.UI.attribution = new St.Bin({style_class: 'attribution'});					this.status("UI.attribution created");
+		
+		this.menu.box.add(this.UI.current);								this.status("UI.current added to menu");
+
 		item = new PopupMenu.PopupSeparatorMenuItem();
 		this.menu.addMenuItem(item);									this.status("Added separator");
+		
+		this.menu.box.add(this.UI.forecast);
 
-		this.menu.addActor(this.UI.forecast);								this.status("UI.forecast added to menu");
-
-		item = new PopupMenu.PopupSeparatorMenuItem();
+		item = new PopupMenu.PopupSeparatorMenuItem();							this.status("UI.forecast added to menu");
 		this.menu.addMenuItem(item);									this.status("Added separator");
-
-		this.menu.addActor(this.UI.attribution);							this.status("UI.attribution added to menu");
+		
+		this.menu.box.add(this.UI.attribution);								this.status("UI.attribution added to menu");
 		this.UI.attribution.hide();
 
 		item = new PopupMenu.PopupSeparatorMenuItem();
@@ -731,7 +753,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 			item.location = i;
 
 				if(i == this.actual_city)
-				item.setShowDot(true);
+				(typeof item.setShowDot == "function") ? item.setShowDot(true) : item.setOrnament(PopupMenu.Ornament.DOT);
 
 			this.UI.locationSelector.menu.addMenuItem(item);
 
@@ -779,6 +801,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 			this.UI.attribution.show();
 			else
 			this.UI.attribution.hide();
+		return 0;
 		},
 
 		rebuildCurrentItem : function(n)
@@ -899,6 +922,8 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 
 		rebuildForecastItem : function(n)
 		{
+		let that = this;
+
 			if(!n)
 			{
 			this.UI.forecast.set_child(new St.Label({ text: _('No forecast information') }));
@@ -918,6 +943,47 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		this.UI.forecastBox.hscroll.hide();
 		this.UI.forecastBox.vscrollbar_policy = Gtk.PolicyType.NEVER;
 		this.UI.forecastBox.hscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
+
+			let scrollTo = function(scroller, v)
+			{
+			scroller.adjustment.value += v;
+			};
+
+			let onScroll = function(actor, event)
+			{
+			let dx = 0;
+				switch (event.get_scroll_direction())
+				{
+				case Clutter.ScrollDirection.UP:
+				dx = -1;
+				break;
+				case Clutter.ScrollDirection.DOWN:
+				dx = 1;
+				break;
+				default:
+				return true;
+				}
+
+			scrollTo(that.UI.forecastBox.hscroll, dx * that.UI.forecastBox.hscroll.adjustment.stepIncrement);
+			return false;
+			};
+
+		let action = new Clutter.PanAction({ interpolate: true });
+
+			action.connect('pan', function(act){
+			let [dist, dx, dy] = act.get_motion_delta(0);
+
+			scrollTo(that.UI.forecastBox.hscroll, (-1 * (dx / that.UI.forecastBox.width) * that.UI.forecastBox.hscroll.adjustment.page_size));
+
+			return false;
+			});
+
+		this.UI.forecastBox.add_action(action);
+
+		this.UI.forecastBox.connect('scroll-event', onScroll);
+		this.UI.forecastBox.hscroll.connect('scroll-event', onScroll);
+
+		this.UI.forecastBox.enable_mouse_scrolling = true;
 
 		this.UI.forecast.set_child(this.UI.forecastBox);
 
@@ -1027,6 +1093,12 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		return 0;
 		},
 
+		get_timezone : function()
+		{
+		let timezone = this.location.get_timezone();
+		return GLib.TimeZone.new(timezone.get_tzid());
+		},
+
 		temperature_string : function(a)
 		{
 		let unit = this.temperature_units;
@@ -1062,9 +1134,14 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		{
 		let that = this;
 		let unit = this.speed_units;
+
 		let wind = a;
 			if(!a)
 			wind = [this.info.get_value_wind(unit)[1], this.info.get_value_wind(unit)[2]];
+
+			if(!wind[0])
+			return "-";
+
 		let v = parseFloat(Math.round(wind[0]*10)/10).toLocaleString();
 		let d = wind[1];
 
@@ -1132,6 +1209,7 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		let that = this;
 		this.InterfaceSettings = Convenience.getSettings("org.gnome.desktop.interface");
 		this.InterfaceSettingsC = this.InterfaceSettings.connect("changed",function(){that.status("**** INTERFACE SETTING CHANGED ("+arguments[1]+")  ****");that.settingsChanged();});
+		return 0;
 		},
 
 		settingsChanged : function()
@@ -1206,7 +1284,8 @@ const WEATHER_DEBUG_EXTENSION = 'debug-extension';			// Weather extension settin
 		{
 			if(!this.settings)
 			this.loadConfig();
-		return this.settings.set_boolean(WEATHER_WIND_DIRECTION_KEY,v);
+		this.settings.set_boolean(WEATHER_WIND_DIRECTION_KEY,v);
+		return 0;
 		},
 
 		get distance_units()

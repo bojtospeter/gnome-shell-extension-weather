@@ -40,7 +40,6 @@ const Lang = imports.lang;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
-
 const EXTENSIONDIR = Me.dir.get_path();
 
 const WEATHER_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.weather';
@@ -79,7 +78,7 @@ Extends: Gtk.Box,
 	{
 		if(typeof __logfile__ == "undefined")
 		{
-		__logfile__ = Gio.file_new_for_path(EXTENSIONDIR+"/weather-prefs.log");
+		__logfile__ = Gio.file_new_for_path(GLib.get_user_cache_dir()+"/weather-extension-prefs.log");
 			if(__logfile__.query_exists(null))
 			__logfile__.delete(null);
 		}
@@ -98,7 +97,7 @@ Extends: Gtk.Box,
 
 	Window : new Gtk.Builder(),
 
-	world : GWeather.Location.new_world(false),
+	world : GWeather.Location.get_world(),
 
 	initWindow : function()
 	{												this.status("Init window");

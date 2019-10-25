@@ -1,286 +1,266 @@
-# gnome-shell-extension-weather ja.po.
-# Copyright (C) 2011,2012 Free Software Foundation, Inc.
-# This file is distributed under the same license as the gnome-shell-extension-weather package.
-# Takeshi AIHANA <takeshi.aihana@gmail.com>, 2011,2012.
-#
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Khaled Hosny <khaledhosny@eglug.org>, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-shell-extension-weather 1.0\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-03-29 18:16+0100\n"
-"PO-Revision-Date: 2012-06-11 12:26+0900\n"
-"Last-Translator: Takeshi AIHANA <takeshi.aihana@gmail.com>\n"
-"Language-Team: Japanese <takeshi.aihana@gmail.com>\n"
-"Language: \n"
+"PO-Revision-Date: 2013-11-19 12:03+0200\n"
+"Last-Translator: Khaled Hosny <khaledhosny@eglug.org>\n"
+"Language-Team: Arabic <doc@arabeyes.org>\n"
+"Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"X-Generator: Virtaal 0.7.1-rc1\n"
+"X-Project-Style: gnome\n"
 
 #: ../src/extension.js:235 ../src/extension.js:243 ../src/extension.js:251
 #: ../src/extension.js:259 ../src/extension.js:575
-#, fuzzy
 msgid "Weather"
-msgstr "設定"
+msgstr "الطقس"
 
 #: ../src/extension.js:237
 msgid "No location configured"
-msgstr ""
+msgstr "لم تحدد أي مكان"
 
 #: ../src/extension.js:245
 msgid "Loading weather"
-msgstr ""
+msgstr "جاري تحميل معلومات الطقس"
 
 #: ../src/extension.js:261
-#, fuzzy
 msgid "Weather extension ready"
-msgstr "設定"
+msgstr "امتداد الطقس جاهز"
 
 #: ../src/extension.js:293 ../src/extension.js:366 ../src/extension.js:373
 msgid ", "
-msgstr ""
+msgstr "، "
 
 #: ../src/extension.js:451
 msgid "Today"
-msgstr ""
+msgstr "اليوم"
 
 #: ../src/extension.js:454
 msgid "Tomorrow"
-msgstr ""
+msgstr "غدًا"
 
 #: ../src/extension.js:457
 msgid "Yesterday"
-msgstr "昨日"
+msgstr "أمس"
 
 #: ../src/extension.js:639
 msgid "Locations"
-msgstr ""
+msgstr "الأماكن"
 
 #: ../src/extension.js:643
-#, fuzzy
 msgid "Reload Weather Information"
-msgstr "天気予報を更新する"
+msgstr "أعِد تحميل معلومات الطقس"
 
 #: ../src/extension.js:648
 msgid "Weather Settings"
-msgstr "設定"
+msgstr "إعدادات الطقس"
 
 #: ../src/extension.js:812
-#, fuzzy
 msgid "No weather information"
-msgstr "天気予報を更新する"
+msgstr "لا معلومات عن الطقس"
 
 #: ../src/extension.js:814
-#, fuzzy, python-format
+#, python-format
 msgid "No weather information for %s"
-msgstr "天気予報を更新する"
+msgstr "لا معلومات عن طقس %s"
 
 #: ../src/extension.js:899
 msgid "Feels like"
-msgstr ""
+msgstr "تبدو مثل"
 
 #: ../src/extension.js:901
 msgid "Visibility"
-msgstr ""
+msgstr "الرؤية"
 
 #: ../src/extension.js:903
 msgid "Humidity"
-msgstr ""
+msgstr "الرطوبة"
 
 #: ../src/extension.js:905
-#, fuzzy
 msgid "Pressure"
-msgstr "気温の単位"
+msgstr "الضغط"
 
 #: ../src/extension.js:907
 msgid "Wind"
-msgstr ""
+msgstr "الرياح"
 
 #: ../src/extension.js:929
-#, fuzzy
 msgid "No forecast information"
-msgstr "天気予報を更新する"
+msgstr "معلومات الطقس غير متوفرة"
 
 #: ../src/extension.js:1114
 #, python-format
 msgid "%s °F"
-msgstr ""
+msgstr "%s °ف"
 
 #: ../src/extension.js:1118
 #, python-format
 msgid "%s °C"
-msgstr ""
+msgstr "%s °م"
 
 #: ../src/extension.js:1122
 #, python-format
 msgid "%s K"
-msgstr ""
+msgstr "%s ك"
 
 #: ../src/extension.js:1128 ../src/extension.js:1186
 msgid "Unknown"
-msgstr ""
+msgstr "غير معروف"
 
 #: ../src/extension.js:1150 ../src/extension.js:1153
 msgid "VAR"
-msgstr ""
+msgstr "متغيّر"
 
 #: ../src/extension.js:1153
 msgid "N"
-msgstr ""
+msgstr "شمال"
 
 #: ../src/extension.js:1153
 msgid "NNE"
-msgstr ""
+msgstr "شمال شمال شرقي"
 
 #: ../src/extension.js:1153
 msgid "NE"
-msgstr ""
+msgstr "شمال شرقي"
 
 #: ../src/extension.js:1153
 msgid "ENE"
-msgstr ""
+msgstr "شرق شمال شرقي"
 
 #: ../src/extension.js:1153
 msgid "E"
-msgstr ""
+msgstr "شرق"
 
 #: ../src/extension.js:1153
 msgid "ESE"
-msgstr ""
+msgstr "شرق جنوب شرقي"
 
 #: ../src/extension.js:1153
 msgid "SE"
-msgstr ""
+msgstr "جنوب شرقي"
 
 #: ../src/extension.js:1153
 msgid "SSE"
-msgstr ""
+msgstr "جنوب جنوب شرقي"
 
 #: ../src/extension.js:1154
 msgid "S"
-msgstr ""
+msgstr "جنوب"
 
 #: ../src/extension.js:1154
 msgid "SSW"
-msgstr ""
+msgstr "جنوب جنوب غربي"
 
 #: ../src/extension.js:1154
 msgid "SW"
-msgstr ""
+msgstr "جنوب غربي"
 
 #: ../src/extension.js:1154
 msgid "WSW"
-msgstr ""
+msgstr "غرب جنوب غربي"
 
 #: ../src/extension.js:1154
 msgid "W"
-msgstr ""
+msgstr "غرب"
 
 #: ../src/extension.js:1154
 msgid "WNW"
-msgstr ""
+msgstr "غرب شمال غربي"
 
 #: ../src/extension.js:1154
 msgid "NW"
-msgstr ""
+msgstr "شمال غربي"
 
 #: ../src/extension.js:1154
 msgid "NNW"
-msgstr ""
+msgstr "شمال شمال غربي"
 
 #: ../src/extension.js:1164
 msgid "$d$s knots"
-msgstr ""
+msgstr "$d$s عقدة"
 
 #: ../src/extension.js:1168
 msgid "$d$s mph"
-msgstr ""
+msgstr "$d$s ميل\\س"
 
 #: ../src/extension.js:1172
 msgid "$d$s km/h"
-msgstr ""
+msgstr "$d$s كم\\س"
 
 #: ../src/extension.js:1176
 msgid "$d$s m/s"
-msgstr ""
+msgstr "$d$s م\\س"
 
 #: ../src/extension.js:1180
 msgid "$dBeaufort $s"
-msgstr ""
+msgstr "$d بوفورت $s"
 
 #: ../src/prefs.js:143
 msgid "Temperature Unit"
-msgstr "気温の単位"
+msgstr "وحدة درجة الحرارة"
 
 #: ../src/prefs.js:145
 msgid "Wind Speed Unit"
-msgstr "風速の単位"
+msgstr "وحدة سرعة الرياح"
 
 #: ../src/prefs.js:147
-#, fuzzy
 msgid "Pressure Unit"
-msgstr "気温の単位"
+msgstr "وحدة الضغط"
 
 #: ../src/prefs.js:149
 msgid "Distance Unit"
-msgstr ""
+msgstr "وحدة المسافة"
 
 #: ../src/prefs.js:151
 msgid "Position in Panel"
-msgstr "配置する場所"
+msgstr "الموضع في اللوحة"
 
 #: ../src/prefs.js:152
 msgid "Center"
-msgstr "中央"
+msgstr "وسط"
 
 #: ../src/prefs.js:152
 msgid "Right"
-msgstr "右側"
+msgstr "يمين"
 
 #: ../src/prefs.js:152
 msgid "Left"
-msgstr "左側"
+msgstr "يسار"
 
 #: ../src/prefs.js:153
 msgid "Wind Direction by Arrows"
-msgstr ""
+msgstr "اتجاه الرياح بالأسهم"
 
 #: ../src/prefs.js:155
 msgid "Symbolic Icons"
-msgstr "シンボリック・アイコンにする"
+msgstr "أيقونات رمزية"
 
 #: ../src/prefs.js:157
 msgid "Temperature in Panel"
-msgstr "パネルに気温を表示する"
+msgstr "درجة الحرارة في اللوحة"
 
 #: ../src/prefs.js:159
 msgid "Conditions in Panel"
-msgstr "パネルに状態を表示する"
+msgstr "الأحوال في اللوحة"
 
 #: ../src/prefs.js:161
 msgid "Debug the extension"
-msgstr ""
+msgstr "نقّح الامتداد"
 
 #: ../src/prefs.js:320
 msgid "Name of the city"
-msgstr "都市の名前"
+msgstr "اسم المدينة"
 
 #: ../src/prefs.js:378
 #, python-format
 msgid "Remove %s ?"
-msgstr "\"%s\" を削除しますか？"
-
-#~ msgid "Invalid city"
-#~ msgstr "都市の名前が間違っています"
-
-#~ msgid "Schema \"%s\" not found."
-#~ msgstr "次のスキーマが見つかりませんでした: \"%s\""
-
-#~ msgid "%s days ago"
-#~ msgstr "%s日前"
-
-#, fuzzy
-#~ msgid "In %s days"
-#~ msgstr "%s日前"
-
-#~ msgid "Translate Conditions"
-#~ msgstr "状態を日本語にする"
+msgstr "أأزيل %s؟"
